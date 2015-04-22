@@ -1,4 +1,6 @@
 FROM golang:1.4.2
-ENV PORT 80
+ENV PORT 8081
 EXPOSE ${PORT}
-CMD go run main.go
+ADD start.sh /tmp/
+RUN chmod +x /tmp/start.sh
+CMD sh /tmp/start.sh
