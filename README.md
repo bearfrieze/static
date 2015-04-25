@@ -1,10 +1,13 @@
 # Static
 
-Static is the caching layer between Litenin and Nimbus.
+Static is the caching layer between [Litenin](https://github.com/bearfrieze/litenin) and [Nimbus](https://github.com/bearfrieze/nimbus).
 
 ## Motivation
 
-Nimbus is backed by a relational database and is tailored to handle single feed queries. This provides great flexibility and simplicity, but lacks speed and effeciency.
+Nimbus is backed by a relational database and is tailored to handle single feed queries. This provides great flexibility and simplicity, but lacks speed and effeciency. Static was planned along with Nimbus, but it was decided not to include the functionality into Nimbus for the following reasons:
+
+- Simplicity and modularization: Nimbus and Static can both focus on doing one thing really well.
+- Distribution and scalability: Availablity of Nimbus resources can easily be increased by launching additional instances of static. Latency can be kept at a minimum by having instances of Static runnning in relevant regions.
 
 ## Goal
 
