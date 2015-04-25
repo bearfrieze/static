@@ -27,6 +27,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(200)
+		return
+	}
+
 	if r.Method != "POST" {
 		http.Error(w, fmt.Sprintf("Unsupported method '%s'\n", r.Method), 501)
 		return
@@ -62,7 +67,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Unable to marshal response: %s\n", err)
 	}
 
-	fmt.Fprintln(w, string(json))
+	w.Write(json)
 }
 
 func main() {
