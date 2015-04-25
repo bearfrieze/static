@@ -4,7 +4,7 @@ Static is the caching layer between Litenin and Nimbus.
 
 ## Motivation
 
-Nimbus is backed by a relational database and is tailored to handle single feed queries. This provides great flexibility and simplicity, but lacks speed
+Nimbus is backed by a relational database and is tailored to handle single feed queries. This provides great flexibility and simplicity, but lacks speed and effeciency.
 
 ## Goal
 
