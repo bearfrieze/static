@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"runtime/debug"
@@ -25,22 +26,22 @@ var nimbus string
 var cache *freecache.Cache
 var maxAgeRex = regexp.MustCompile(`max-age:(\d+)`)
 
-func getChannel(url string) (*json.RawMessage, error) {
+func getFeed(u string) (*json.RawMessage, error) {
 
-	key := []byte(url)
+	key := []byte(u)
 
 	var data []byte
 	data, err := cache.Get(key)
 	if err != nil {
-		log.Printf("Fetching %s\n", url)
-		r, err := http.Get(url)
+		log.Printf("Fetching %s\n", u)
+		r, err := http.Get(fmt.Sprintf("%s/?url=%s", nimbus, url.QueryEscape(u)))
 		if err != nil {
-			return nil, fmt.Errorf("Failed to fetch %s: %s", url, err)
+			return nil, fmt.Errorf("Failed to fetch %s: %s", u, err)
 		}
 		data, _ = ioutil.ReadAll(r.Body)
 		maxAge, err := getMaxAge(&r.Header)
 		if err == nil {
-			log.Printf("Storing %s in cache, expires in %d seconds\n", url, *maxAge)
+			log.Printf("Storing %s in cache, expires in %d seconds\n", u, *maxAge)
 			err = cache.Set(key, data, *maxAge)
 			if err != nil {
 				log.Printf("Failed to store %s in cache: %s\n", err)
@@ -98,17 +99,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	response := make(map[string]*json.RawMessage)
 	var wg sync.WaitGroup
-	for _, url := range urls {
+	for _, u := range urls {
 		wg.Add(1)
-		go func(url string, response map[string]*json.RawMessage) {
+		go func(u string, response map[string]*json.RawMessage) {
 			defer wg.Done()
-			json, err := getChannel(fmt.Sprintf("%s/?url=%s", nimbus, url))
+			json, err := getFeed(u)
 			if err != nil {
 				log.Println(err)
 				return
 			}
-			response[url] = json
-		}(url, response)
+			response[u] = json
+		}(u, response)
 	}
 	wg.Wait()
 
