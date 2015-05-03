@@ -15,7 +15,11 @@ import (
 	"time"
 )
 
-const logFrequency = 60 * 60
+const (
+	cacheSize    = 800 * 1024 * 1024
+	gcPercent    = 20
+	logFrequency = 60 * 15
+)
 
 var nimbus string
 var cache *freecache.Cache
@@ -118,15 +122,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	cacheSize := 500 * 1024 * 1024
 	cache = freecache.NewCache(cacheSize)
-	debug.SetGCPercent(20)
+	debug.SetGCPercent(gcPercent)
 
 	// Start logging cache stats
 	go func() {
 		for _ = range time.Tick(logFrequency * time.Second) {
 			log.Printf("EntryCount: %d\n", cache.EntryCount())
 			log.Printf("EvacuateCount: %d\n", cache.EvacuateCount())
+			log.Printf("AverageAccessTime: %d\n", time.Now().Unix()-cache.AverageAccessTime())
 			log.Printf("HitCount: %d\n", cache.HitCount())
 			log.Printf("LookupCount: %d\n", cache.LookupCount())
 			log.Printf("HitRate: %f\n\n", cache.HitRate())
