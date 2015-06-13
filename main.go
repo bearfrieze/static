@@ -18,7 +18,7 @@ import (
 
 const (
 	cacheSize    = 800 * 1024 * 1024
-	gcPercent    = 20
+	gcPercent    = 10 // https://github.com/coocood/freecache/issues/5
 	logFrequency = 60 * 15
 )
 
