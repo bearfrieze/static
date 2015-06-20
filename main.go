@@ -48,12 +48,14 @@ func fetchFeed(u string) {
 	}
 	data, _ := ioutil.ReadAll(r.Body)
 	maxAge, err := getMaxAge(&r.Header)
-	if err == nil {
-		log.Printf("Storing %s in cache, expires in %d seconds\n", u, *maxAge)
-		err = cache.Set([]byte(u), data, *maxAge)
-		if err != nil {
-			log.Printf("Failed to store %s in cache: %s\n", err)
-		}
+	if err != nil {
+		log.Printf("Unable to read max age of %s: %s", u, err)
+		return
+	}
+	log.Printf("Storing %s in cache, expires in %d seconds\n", u, *maxAge)
+	err = cache.Set([]byte(u), data, *maxAge)
+	if err != nil {
+		log.Printf("Failed to store %s in cache: %s\n", err)
 	}
 }
 
