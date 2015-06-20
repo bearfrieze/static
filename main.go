@@ -26,31 +26,35 @@ var nimbus string
 var cache *freecache.Cache
 var maxAgeRex = regexp.MustCompile(`max-age:(\d+)`)
 
-func getFeed(u string) (*json.RawMessage, error) {
-
-	key := []byte(u)
+func getFeed(u string) *json.RawMessage {
 
 	var data []byte
-	data, err := cache.Get(key)
+	data, err := cache.Get([]byte(u))
 	if err != nil {
-		log.Printf("Fetching %s\n", u)
-		r, err := http.Get(fmt.Sprintf("%s/?url=%s", nimbus, url.QueryEscape(u)))
-		if err != nil {
-			return nil, fmt.Errorf("Failed to fetch %s: %s", u, err)
-		}
-		data, _ = ioutil.ReadAll(r.Body)
-		maxAge, err := getMaxAge(&r.Header)
-		if err == nil {
-			log.Printf("Storing %s in cache, expires in %d seconds\n", u, *maxAge)
-			err = cache.Set(key, data, *maxAge)
-			if err != nil {
-				log.Printf("Failed to store %s in cache: %s\n", err)
-			}
-		}
+		go fetchFeed(u)
+		data = []byte("true")
 	}
 
 	rm := json.RawMessage(data)
-	return &rm, nil
+	return &rm
+}
+
+func fetchFeed(u string) {
+	log.Printf("Fetching %s\n", u)
+	r, err := http.Get(fmt.Sprintf("%s/?url=%s", nimbus, url.QueryEscape(u)))
+	if err != nil {
+		log.Printf("Failed to fetch %s: %s", u, err)
+		return
+	}
+	data, _ := ioutil.ReadAll(r.Body)
+	maxAge, err := getMaxAge(&r.Header)
+	if err == nil {
+		log.Printf("Storing %s in cache, expires in %d seconds\n", u, *maxAge)
+		err = cache.Set([]byte(u), data, *maxAge)
+		if err != nil {
+			log.Printf("Failed to store %s in cache: %s\n", err)
+		}
+	}
 }
 
 func getMaxAge(h *http.Header) (*int, error) {
@@ -103,12 +107,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		wg.Add(1)
 		go func(u string, response map[string]*json.RawMessage) {
 			defer wg.Done()
-			json, err := getFeed(u)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			response[u] = json
+			response[u] = getFeed(u)
 		}(u, response)
 	}
 	wg.Wait()
