@@ -1,5 +1,7 @@
 # Static
 
+**Static has been retired in favor of Redis and is no longer maintained.**
+
 Static is the caching layer between [Litenin](https://github.com/bearfrieze/litenin) and [Nimbus](https://github.com/bearfrieze/nimbus).
 
 ## Motivation
