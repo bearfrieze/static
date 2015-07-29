@@ -1,6 +1,6 @@
 # Static
 
-**Static has been retired and is no longer maintained. Responses of batch requsts of feeds are now handled by Nimbus that uses Redis for caching.**
+**Static has been retired and is no longer maintained. Batch feed requests of the type that Static used to handle are now handled by Nimbus that uses Redis for caching.**
 
 Static is the caching layer between [Litenin](https://github.com/bearfrieze/litenin) and [Nimbus](https://github.com/bearfrieze/nimbus).
 
